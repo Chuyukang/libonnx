@@ -1,21 +1,24 @@
-#
-# Makefile for library
-#
+SYSROOT=$(HOME)/tmp/root/usr/local/riscv64-carrier
+CHERI_SDK=$(HOME)/cheri/output/sdk
 
-CROSS_COMPILE	?= 
+CC=$(CHERI_SDK)/bin/riscv64-unknown-freebsd-clang
+CFLAGS=--target=riscv64-carrier -march=rv64gcxcheri -mabi=lp64d \
+	--sysroot=$(HOME)/cheri/output/sdk/sysroot-riscv64-hybrid \
+	-fPIC -fPIE -mno-relax -static\
+	-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0  -fno-stack-protector \
+	-fno-common \
+	-ffreestanding -nostdlib -nostdinc \
+	-I $(SYSROOT)/include \
+	-I /home/chu/cheri/llvm-project/clang/lib/Headers
+LD=$(CHERI_SDK)/bin/riscv64-unknown-freebsd-ld
+AS=$(CHERI_SDK)/bin/riscv64-unknown-freebsd-cc -x assembler-with-cpp
+AR=$(CHERI_SDK)/bin/riscv64-unknown-freebsd-ar
+OC=$(CHERI_SDK)/bin/riscv64-unknown-freebsd-objcopy
+OD=$(CHERI_SDK)/bin/riscv64-unknown-freebsd-objdump
+RM=rm -fr
 
-AS			:= $(CROSS_COMPILE)gcc -x assembler-with-cpp
-CC			:= $(CROSS_COMPILE)gcc
-CXX			:= $(CROSS_COMPILE)g++
-LD			:= $(CROSS_COMPILE)ld
-AR			:= $(CROSS_COMPILE)ar
-OC			:= $(CROSS_COMPILE)objcopy
-OD			:= $(CROSS_COMPILE)objdump
-RM			:= rm -fr
+LDFLAGS=-fuse-ld=lld -mno-relax
 
-ASFLAGS		:= -g -ggdb -Wall -O3
-CFLAGS		:= -g -ggdb -Wall -O3
-CXXFLAGS	:= -g -ggdb -Wall -O3
 INCDIRS		:= -I .
 SRCDIRS		:= . default
 
@@ -59,3 +62,4 @@ clean:
 	@$(RM) $(DEPS) $(OBJS) $(NAME)
 
 sinclude $(DEPS)
+
